@@ -1,35 +1,76 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import Header from "./components/header";
+import Card from "./components/card";
+import Winner from "./components/winner";
+import Loser from "./components/loser";
+import Rules from "./components/rules";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [hasWon, setHasWon] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [reset, setReset] = useState(0);
+  const [data, setData] = useState([]);
+  const [numberOfPokemon, setNumberOfPokemon] = useState(5);
+  const [showRules, setShowRules] = useState(true);
+
+  function updateScore() {
+    setScore(score + 1);
+    if (score + 1 === numberOfPokemon) {
+      setHighScore(score + 1);
+      localStorage.setItem("highScore", score + 1);
+      setHasWon(true);
+    }
+  }
+
+  function resetGame() {
+    if (highScore < score) {
+      setHighScore(score);
+      localStorage.setItem("highScore", score);
+    }
+    setScore(0);
+    setGameOver(false);
+    if (hasWon) {
+      setHasWon(false);
+      setNumberOfPokemon(numberOfPokemon + 2);
+    }
+    setData([]);
+    setReset(reset + 1);
+  }
+
+  function updateHighScore() {
+    if (highScore < score) {
+      setHighScore(score);
+      localStorage.setItem("highScore", score);
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <Header score={score} highScore={highScore}></Header>
+      <Card
+        updateScore={updateScore}
+        updateHighScore={updateHighScore}
+        gameOver={gameOver}
+        changeGameOver={() => {
+          setGameOver(true);
+        }}
+        reset={reset}
+        pokemonData={data}
+        setData={setData}
+        numberOfPokemon={numberOfPokemon}
+      ></Card>
+      {showRules ? (
+        <Rules
+          resetGame={() => {
+            setShowRules(false);
+          }}
+        />
+      ) : null}
+      {hasWon ? <Winner score={score} resetGame={resetGame} /> : null}
+      {gameOver ? <Loser score={score} resetGame={resetGame} /> : null}
+    </div>
+  );
 }
-
-export default App
+export default App;
